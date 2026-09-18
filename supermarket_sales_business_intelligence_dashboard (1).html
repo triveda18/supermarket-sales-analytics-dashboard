@@ -1,0 +1,146 @@
+
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Supermarket Sales Analytics &amp; Interactive Dashboard</title>
+<style>
+:root{--navy:#0f172a;--blue:#2563eb;--cyan:#06b6d4;--purple:#7c3aed;--green:#059669;--bg:#f1f5f9;--card:#ffffff;--muted:#64748b;--border:#e2e8f0}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--navy)}
+.header{background:linear-gradient(120deg,#0f172a,#1d4ed8);color:#fff;padding:28px 34px 30px}
+.header-inner{max-width:1500px;margin:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:18px}
+h1{margin:0;font-size:30px;letter-spacing:-.7px} .subtitle{margin-top:7px;color:#cbd5e1;font-size:14px} .tag{padding:9px 13px;border-radius:999px;background:rgba(255,255,255,.16);font-size:12px;font-weight:700;white-space:nowrap}
+.wrap{max-width:1500px;margin:auto;padding:22px 28px 36px}
+.filter-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:17px 18px;margin-top:-16px;position:relative;box-shadow:0 8px 24px rgba(15,23,42,.10)}
+.filter-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px} label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px} select,input{width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:9px 10px;background:#fff;color:var(--navy);font-size:13px} select[multiple]{height:72px} .actions{display:flex;gap:8px;margin-top:12px} button{border:0;border-radius:9px;padding:9px 14px;font-weight:700;cursor:pointer} .apply{background:var(--blue);color:#fff} .reset{background:#e2e8f0;color:var(--navy)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0} .kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:17px;box-shadow:0 3px 12px rgba(15,23,42,.05)} .kpi-label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px} .kpi-value{font-size:28px;font-weight:800;margin-top:8px} .kpi-accent{height:4px;width:42px;border-radius:5px;margin-top:13px;background:var(--blue)}
+.section-subtitle{font-weight:800;color:#334155;font-size:14px;margin:16px 0 -8px;letter-spacing:.2px}.loading{height:100%;min-height:300px;display:flex;align-items:center;justify-content:center;color:#64748b;font-weight:600}.chart-card svg{width:100%;height:365px;display:block;font-family:Inter,Arial,sans-serif}.chart-card{overflow:hidden}.section-title{font-size:17px;font-weight:800;margin:23px 0 11px} .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px} .chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:8px;box-shadow:0 3px 12px rgba(15,23,42,.05);min-height:410px} .wide{grid-column:span 2}.grid>.section-subtitle{grid-column:span 2}
+.footer-note{background:#e0f2fe;border-left:4px solid var(--cyan);border-radius:10px;padding:14px 16px;margin-top:18px;color:#0c4a6e;font-size:13px;line-height:1.5}
+@media(max-width:1100px){.filter-grid{grid-template-columns:repeat(3,1fr)}.kpis{grid-template-columns:repeat(2,1fr)}} @media(max-width:700px){.header-inner{display:block}.tag{display:inline-block;margin-top:14px}.wrap{padding:20px 12px}.filter-grid,.grid{grid-template-columns:1fr}.wide{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class='header'><div class='header-inner'><div><h1>Supermarket Sales Analytics &amp; Interactive Dashboard</h1><div class='subtitle'>Interactive performance view using the cleaned dataset and existing calculated values</div></div><div class='tag'>PERSONAL DATA ANALYTICS PROJECT</div></div></div>
+<div class='wrap'>
+<div class='filter-panel'>
+<div class='filter-grid'>
+<div><label>Date from</label><input id='dateFrom' type='date' value='2025-01-01'></div>
+<div><label>Date to</label><input id='dateTo' type='date' value='2025-03-12'></div>
+<div><label>City</label><select id='city' multiple><option value='Hyderabad'>Hyderabad</option><option value='Vijayawada'>Vijayawada</option><option value='Visakhapatnam'>Visakhapatnam</option></select></div>
+<div><label>Product category</label><select id='category' multiple><option value='Clothing'>Clothing</option><option value='Electronics'>Electronics</option><option value='Food'>Food</option></select></div>
+<div><label>Gender</label><select id='gender' multiple><option value='Female'>Female</option><option value='Male'>Male</option></select></div>
+<div><label>Customer type</label><select id='customer' multiple><option value='Member'>Member</option><option value='Normal'>Normal</option></select></div>
+<div><label>Payment method</label><select id='payment' multiple><option value='Cash'>Cash</option><option value='Credit Card'>Credit Card</option><option value='UPI'>UPI</option></select></div>
+</div>
+<div class='actions'><button class='apply' onclick='applyFilters()'>Apply filters</button><button class='reset' onclick='resetFilters()'>Reset</button></div>
+</div>
+<div class='kpis'>
+<div class='kpi'><div class='kpi-label'>Total sales</div><div class='kpi-value' id='kpiSales'>₹186,100</div><div class='kpi-accent'></div></div>
+<div class='kpi'><div class='kpi-label'>Total orders</div><div class='kpi-value' id='kpiOrders'>40</div><div class='kpi-accent' style='background:var(--purple)'></div></div>
+<div class='kpi'><div class='kpi-label'>Total quantity</div><div class='kpi-value' id='kpiQty'>201</div><div class='kpi-accent' style='background:var(--green)'></div></div>
+<div class='kpi'><div class='kpi-label'>Average order value</div><div class='kpi-value' id='kpiAov'>₹4,652</div><div class='kpi-accent' style='background:var(--cyan)'></div></div>
+</div>
+<div class='section-title'>Sales trends and performance mix</div>
+<div class='grid'>
+<div class='section-subtitle'>Monthly sales trends from January to March 2025</div>
+<div class='chart-card wide' id='monthlyChart'><div class='loading'>Loading monthly sales trend…</div></div>
+<div class='section-subtitle'>Sales performance mix</div>
+<div class='chart-card' id='categoryChart'><div class='loading'>Loading category sales…</div></div>
+<div class='chart-card' id='locationChart'><div class='loading'>Loading city and branch sales…</div></div>
+<div class='chart-card' id='productChart'><div class='loading'>Loading product ranking…</div></div>
+<div class='chart-card' id='paymentChart'><div class='loading'>Loading payment method sales…</div></div>
+<div class='chart-card' id='customerChart'><div class='loading'>Loading customer type sales…</div></div>
+<div class='chart-card' id='genderChart'><div class='loading'>Loading gender sales…</div></div>
+</div>
+<div class='footer-note'><b>How to use this dashboard</b> Select one or more values in the slicers and click Apply filters. The KPI cards and all charts update using only the existing dataset values. Use Reset to return to the full dataset.</div>
+</div>
+<script>
+const DATA = [{"Invoice_ID": "INV001", "Date": "2025-01-01", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Electronics", "Product": "Headphones", "Quantity": 2, "Unit_Price": 1500, "Payment_Method": "Credit Card", "Total_Sales": 3000, "Month": "2025-01"}, {"Invoice_ID": "INV002", "Date": "2025-01-02", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Food", "Product": "Rice", "Quantity": 5, "Unit_Price": 800, "Payment_Method": "Cash", "Total_Sales": 4000, "Month": "2025-01"}, {"Invoice_ID": "INV003", "Date": "2025-01-03", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Clothing", "Product": "Jeans", "Quantity": 2, "Unit_Price": 1800, "Payment_Method": "UPI", "Total_Sales": 3600, "Month": "2025-01"}, {"Invoice_ID": "INV004", "Date": "2025-01-04", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Electronics", "Product": "Keyboard", "Quantity": 3, "Unit_Price": 1200, "Payment_Method": "UPI", "Total_Sales": 3600, "Month": "2025-01"}, {"Invoice_ID": "INV005", "Date": "2025-01-05", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Food", "Product": "Cooking Oil", "Quantity": 4, "Unit_Price": 600, "Payment_Method": "Credit Card", "Total_Sales": 2400, "Month": "2025-01"}, {"Invoice_ID": "INV006", "Date": "2025-01-06", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Clothing", "Product": "Shirt", "Quantity": 3, "Unit_Price": 900, "Payment_Method": "Cash", "Total_Sales": 2700, "Month": "2025-01"}, {"Invoice_ID": "INV007", "Date": "2025-01-07", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Electronics", "Product": "Mouse", "Quantity": 4, "Unit_Price": 700, "Payment_Method": "UPI", "Total_Sales": 2800, "Month": "2025-01"}, {"Invoice_ID": "INV008", "Date": "2025-01-08", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Food", "Product": "Biscuits", "Quantity": 10, "Unit_Price": 50, "Payment_Method": "Cash", "Total_Sales": 500, "Month": "2025-01"}, {"Invoice_ID": "INV009", "Date": "2025-01-09", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Clothing", "Product": "Dress", "Quantity": 2, "Unit_Price": 2200, "Payment_Method": "Credit Card", "Total_Sales": 4400, "Month": "2025-01"}, {"Invoice_ID": "INV010", "Date": "2025-01-10", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Electronics", "Product": "Monitor", "Quantity": 1, "Unit_Price": 12000, "Payment_Method": "Credit Card", "Total_Sales": 12000, "Month": "2025-01"}, {"Invoice_ID": "INV011", "Date": "2025-01-11", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Food", "Product": "Rice", "Quantity": 8, "Unit_Price": 800, "Payment_Method": "UPI", "Total_Sales": 6400, "Month": "2025-01"}, {"Invoice_ID": "INV012", "Date": "2025-01-12", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Clothing", "Product": "Jeans", "Quantity": 3, "Unit_Price": 1800, "Payment_Method": "Cash", "Total_Sales": 5400, "Month": "2025-01"}, {"Invoice_ID": "INV013", "Date": "2025-01-13", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Electronics", "Product": "Keyboard", "Quantity": 2, "Unit_Price": 1200, "Payment_Method": "UPI", "Total_Sales": 2400, "Month": "2025-01"}, {"Invoice_ID": "INV014", "Date": "2025-01-14", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Food", "Product": "Cooking Oil", "Quantity": 6, "Unit_Price": 600, "Payment_Method": "Cash", "Total_Sales": 3600, "Month": "2025-01"}, {"Invoice_ID": "INV015", "Date": "2025-01-15", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Clothing", "Product": "Shirt", "Quantity": 4, "Unit_Price": 900, "Payment_Method": "Credit Card", "Total_Sales": 3600, "Month": "2025-01"}, {"Invoice_ID": "INV016", "Date": "2025-01-16", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Electronics", "Product": "Headphones", "Quantity": 3, "Unit_Price": 1500, "Payment_Method": "UPI", "Total_Sales": 4500, "Month": "2025-01"}, {"Invoice_ID": "INV017", "Date": "2025-01-17", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Food", "Product": "Biscuits", "Quantity": 15, "Unit_Price": 50, "Payment_Method": "Cash", "Total_Sales": 750, "Month": "2025-01"}, {"Invoice_ID": "INV018", "Date": "2025-01-18", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Clothing", "Product": "Dress", "Quantity": 1, "Unit_Price": 2200, "Payment_Method": "Credit Card", "Total_Sales": 2200, "Month": "2025-01"}, {"Invoice_ID": "INV019", "Date": "2025-01-19", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Electronics", "Product": "Mouse", "Quantity": 5, "Unit_Price": 700, "Payment_Method": "UPI", "Total_Sales": 3500, "Month": "2025-01"}, {"Invoice_ID": "INV020", "Date": "2025-01-20", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Food", "Product": "Rice", "Quantity": 6, "Unit_Price": 800, "Payment_Method": "Credit Card", "Total_Sales": 4800, "Month": "2025-01"}, {"Invoice_ID": "INV021", "Date": "2025-02-21", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Clothing", "Product": "Jeans", "Quantity": 2, "Unit_Price": 1800, "Payment_Method": "UPI", "Total_Sales": 3600, "Month": "2025-02"}, {"Invoice_ID": "INV022", "Date": "2025-02-22", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Electronics", "Product": "Monitor", "Quantity": 2, "Unit_Price": 12000, "Payment_Method": "Credit Card", "Total_Sales": 24000, "Month": "2025-02"}, {"Invoice_ID": "INV023", "Date": "2025-02-23", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Food", "Product": "Cooking Oil", "Quantity": 5, "Unit_Price": 600, "Payment_Method": "Cash", "Total_Sales": 3000, "Month": "2025-02"}, {"Invoice_ID": "INV024", "Date": "2025-02-24", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Clothing", "Product": "Shirt", "Quantity": 2, "Unit_Price": 900, "Payment_Method": "UPI", "Total_Sales": 1800, "Month": "2025-02"}, {"Invoice_ID": "INV025", "Date": "2025-02-25", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Electronics", "Product": "Keyboard", "Quantity": 4, "Unit_Price": 1200, "Payment_Method": "Credit Card", "Total_Sales": 4800, "Month": "2025-02"}, {"Invoice_ID": "INV026", "Date": "2025-02-26", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Food", "Product": "Biscuits", "Quantity": 20, "Unit_Price": 50, "Payment_Method": "Cash", "Total_Sales": 1000, "Month": "2025-02"}, {"Invoice_ID": "INV027", "Date": "2025-02-27", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Clothing", "Product": "Dress", "Quantity": 3, "Unit_Price": 2200, "Payment_Method": "UPI", "Total_Sales": 6600, "Month": "2025-02"}, {"Invoice_ID": "INV028", "Date": "2025-02-28", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Electronics", "Product": "Headphones", "Quantity": 4, "Unit_Price": 1500, "Payment_Method": "Credit Card", "Total_Sales": 6000, "Month": "2025-02"}, {"Invoice_ID": "INV029", "Date": "2025-03-01", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Food", "Product": "Rice", "Quantity": 10, "Unit_Price": 800, "Payment_Method": "UPI", "Total_Sales": 8000, "Month": "2025-03"}, {"Invoice_ID": "INV030", "Date": "2025-03-02", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Clothing", "Product": "Jeans", "Quantity": 2, "Unit_Price": 1800, "Payment_Method": "Cash", "Total_Sales": 3600, "Month": "2025-03"}, {"Invoice_ID": "INV031", "Date": "2025-03-03", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Electronics", "Product": "Mouse", "Quantity": 6, "Unit_Price": 700, "Payment_Method": "UPI", "Total_Sales": 4200, "Month": "2025-03"}, {"Invoice_ID": "INV032", "Date": "2025-03-04", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Food", "Product": "Cooking Oil", "Quantity": 3, "Unit_Price": 600, "Payment_Method": "Credit Card", "Total_Sales": 1800, "Month": "2025-03"}, {"Invoice_ID": "INV033", "Date": "2025-03-05", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Clothing", "Product": "Shirt", "Quantity": 5, "Unit_Price": 900, "Payment_Method": "Cash", "Total_Sales": 4500, "Month": "2025-03"}, {"Invoice_ID": "INV034", "Date": "2025-03-06", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Electronics", "Product": "Monitor", "Quantity": 1, "Unit_Price": 12000, "Payment_Method": "Credit Card", "Total_Sales": 12000, "Month": "2025-03"}, {"Invoice_ID": "INV035", "Date": "2025-03-07", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Food", "Product": "Biscuits", "Quantity": 25, "Unit_Price": 50, "Payment_Method": "UPI", "Total_Sales": 1250, "Month": "2025-03"}, {"Invoice_ID": "INV036", "Date": "2025-03-08", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Clothing", "Product": "Dress", "Quantity": 2, "Unit_Price": 2200, "Payment_Method": "Cash", "Total_Sales": 4400, "Month": "2025-03"}, {"Invoice_ID": "INV037", "Date": "2025-03-09", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Member", "Gender": "Male", "Product_Category": "Electronics", "Product": "Keyboard", "Quantity": 3, "Unit_Price": 1200, "Payment_Method": "UPI", "Total_Sales": 3600, "Month": "2025-03"}, {"Invoice_ID": "INV038", "Date": "2025-03-10", "Branch": "B", "City": "Vijayawada", "Customer_Type": "Normal", "Gender": "Female", "Product_Category": "Food", "Product": "Rice", "Quantity": 7, "Unit_Price": 800, "Payment_Method": "Credit Card", "Total_Sales": 5600, "Month": "2025-03"}, {"Invoice_ID": "INV039", "Date": "2025-03-11", "Branch": "C", "City": "Visakhapatnam", "Customer_Type": "Member", "Gender": "Female", "Product_Category": "Clothing", "Product": "Jeans", "Quantity": 4, "Unit_Price": 1800, "Payment_Method": "UPI", "Total_Sales": 7200, "Month": "2025-03"}, {"Invoice_ID": "INV040", "Date": "2025-03-12", "Branch": "A", "City": "Hyderabad", "Customer_Type": "Normal", "Gender": "Male", "Product_Category": "Electronics", "Product": "Headphones", "Quantity": 2, "Unit_Price": 1500, "Payment_Method": "Cash", "Total_Sales": 3000, "Month": "2025-03"}];
+const money = x => '₹' + Math.round(Number(x) || 0).toLocaleString('en-IN');
+const selected = id => Array.from(document.getElementById(id).selectedOptions).map(o => o.value);
+const sum = (a, f) => a.reduce((s, r) => s + Number(r[f] || 0), 0);
+const COLORS = ['#2563eb','#7c3aed','#06b6d4','#f59e0b','#ec4899','#059669','#0ea5e9','#a78bfa'];
+
+function group(a, field) {
+  const m = {};
+  a.forEach(r => {
+    const k = r[field] ?? 'Unknown';
+    if (!m[k]) m[k] = {sales: 0, qty: 0, orders: new Set()};
+    m[k].sales += Number(r.Total_Sales || 0);
+    m[k].qty += Number(r.Quantity || 0);
+    m[k].orders.add(r.Invoice_ID);
+  });
+  return Object.entries(m).map(([name, v]) => ({name, sales: v.sales, qty: v.qty, orders: v.orders.size})).sort((x, y) => y.sales - x.sales);
+}
+function esc(v) { return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function svgText(x, y, txt, attrs='') { return `<text x="${x}" y="${y}" ${attrs}>${esc(txt)}</text>`; }
+function setChart(id, content) { document.getElementById(id).innerHTML = `<svg viewBox="0 0 700 365" role="img" aria-label="${id}">${content}</svg>`; }
+function emptyChart(id, title) { setChart(id, svgText(24, 31, title, 'font-size="16" font-weight="800" fill="#0f172a"') + svgText(350, 190, 'No data matches the selected filters', 'text-anchor="middle" font-size="14" fill="#64748b"')); }
+function axisLabel(v) { return money(v); }
+function lineChart(id, title, items) {
+  if (!items.some(d => d.sales)) return emptyChart(id, title);
+  const W=700,H=365,L=68,R=28,T=60,B=58, pw=W-L-R, ph=H-T-B, max=Math.max(...items.map(d=>d.sales),1), ticks=4;
+  let s = svgText(24,31,title,'font-size="16" font-weight="800" fill="#0f172a"');
+  s += `<line x1="${L}" y1="${T+ph}" x2="${W-R}" y2="${T+ph}" stroke="#cbd5e1"/><line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="#cbd5e1"/>`;
+  for(let i=0;i<=ticks;i++){ const val=max*i/ticks, y=T+ph-(val/max)*ph; s+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#e2e8f0"/>`; s+=svgText(L-9,y+4,axisLabel(val),'text-anchor="end" font-size="11" fill="#64748b"'); }
+  const pts=items.map((d,i)=>{const x=L+(items.length===1?pw/2:i*pw/(items.length-1)),y=T+ph-(d.sales/max)*ph;return {x,y,...d};});
+  s+=`<polyline points="${pts.map(p=>p.x+','+p.y).join(' ')}" fill="none" stroke="#2563eb" stroke-width="4" stroke-linejoin="round"/>`;
+  pts.forEach(p=>{ s+=`<circle cx="${p.x}" cy="${p.y}" r="6" fill="#06b6d4" stroke="#fff" stroke-width="2"><title>${esc(p.name)}: ${money(p.sales)}</title></circle>`; s+=svgText(p.x,p.y-14,money(p.sales),'text-anchor="middle" font-size="11" font-weight="700" fill="#334155"'); s+=svgText(p.x,T+ph+28,p.name,'text-anchor="middle" font-size="12" fill="#475569"'); });
+  setChart(id,s);
+}
+function barChart(id, title, items, opts={}) {
+  if (!items.length || !items.some(d=>d.sales)) return emptyChart(id,title);
+  const W=700,H=365,L=70,R=26,T=60,B=70,pw=W-L-R,ph=H-T-B,max=Math.max(...items.map(d=>d.sales),1), ticks=4;
+  let s=svgText(24,31,title,'font-size="16" font-weight="800" fill="#0f172a"');
+  s+=`<line x1="${L}" y1="${T+ph}" x2="${W-R}" y2="${T+ph}" stroke="#cbd5e1"/><line x1="${L}" y1="${T}" x2="${L}" y2="${T+ph}" stroke="#cbd5e1"/>`;
+  for(let i=0;i<=ticks;i++){const val=max*i/ticks,y=T+ph-val/max*ph;s+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#e2e8f0"/>`+svgText(L-8,y+4,money(val),'text-anchor="end" font-size="11" fill="#64748b"');}
+  const slot=pw/items.length,bw=Math.min(76,slot*.62);
+  items.forEach((d,i)=>{const h=d.sales/max*ph,x=L+i*slot+(slot-bw)/2,y=T+ph-h,c=opts.colors?.[i%opts.colors.length]||COLORS[i%COLORS.length];s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="5" fill="${c}"><title>${esc(d.name)}: ${money(d.sales)}</title></rect>`;s+=svgText(x+bw/2,Math.max(T+13,y-7),money(d.sales),'text-anchor="middle" font-size="11" font-weight="700" fill="#334155"');s+=svgText(x+bw/2,T+ph+20,d.name,'text-anchor="middle" font-size="11" fill="#475569"');});
+  setChart(id,s);
+}
+function groupedBarChart(id,title,city,branch) {
+  const items=[...city.map(d=>({...d,series:'City'})),...branch.map(d=>({...d,series:'Branch'}))]; if(!items.length) return emptyChart(id,title);
+  const W=700,H=365,L=70,R=26,T=65,B=70,pw=W-L-R,ph=H-T-B,max=Math.max(...items.map(d=>d.sales),1), ticks=4;
+  let s=svgText(24,31,title,'font-size="16" font-weight="800" fill="#0f172a"')+`<rect x="490" y="18" width="11" height="11" fill="#2563eb" rx="2"/>`+svgText(506,28,'City','font-size="11" fill="#475569"')+`<rect x="550" y="18" width="11" height="11" fill="#f59e0b" rx="2"/>`+svgText(566,28,'Branch','font-size="11" fill="#475569"');
+  s+=`<line x1="${L}" y1="${T+ph}" x2="${W-R}" y2="${T+ph}" stroke="#cbd5e1"/>`;
+  for(let i=0;i<=ticks;i++){const val=max*i/ticks,y=T+ph-val/max*ph;s+=`<line x1="${L}" y1="${y}" x2="${W-R}" y2="${y}" stroke="#e2e8f0"/>`+svgText(L-8,y+4,money(val),'text-anchor="end" font-size="11" fill="#64748b"');}
+  const draw=(arr,offset,color)=>arr.forEach((d,i)=>{const slot=pw/3,bw=slot*.34,x=L+i*slot+slot*.16+offset,y=T+ph-d.sales/max*ph,h=d.sales/max*ph;s+=`<rect x="${x}" y="${y}" width="${bw}" height="${h}" rx="4" fill="${color}"><title>${esc(d.name)}: ${money(d.sales)}</title></rect>`+svgText(x+bw/2,T+ph+20,d.name,'text-anchor="middle" font-size="11" fill="#475569"');});
+  draw(city,0,'#2563eb'); draw(branch,pw/3*.38,'#f59e0b'); setChart(id,s);
+}
+function horizontalBarChart(id,title,items) {
+  if(!items.length) return emptyChart(id,title);
+  const W=700,H=365,L=150,R=76,T=60,B=36,pw=W-L-R,ph=H-T-B,max=Math.max(...items.map(d=>d.sales),1),row=ph/items.length;
+  let s=svgText(24,31,title,'font-size="16" font-weight="800" fill="#0f172a"');
+  items.forEach((d,i)=>{const y=T+i*row+row*.18,h=row*.62,w=d.sales/max*pw,c=COLORS[i%COLORS.length];s+=svgText(L-9,y+h/2+4,d.name,'text-anchor="end" font-size="11" fill="#475569"')+`<rect x="${L}" y="${y}" width="${w}" height="${h}" rx="4" fill="${c}"><title>${esc(d.name)}: ${money(d.sales)}</title></rect>`+svgText(Math.min(W-R+4,L+w+6),y+h/2+4,money(d.sales),'font-size="11" font-weight="700" fill="#334155"');});
+  setChart(id,s);
+}
+function donutChart(id,title,items) {
+  if(!items.length || !items.some(d=>d.sales)) return emptyChart(id,title);
+  const W=700,H=365,cx=260,cy=200,r=104,total=sum(items,'sales'); let angle=-Math.PI/2;
+  let s=svgText(24,31,title,'font-size="16" font-weight="800" fill="#0f172a"');
+  items.forEach((d,i)=>{const a=d.sales/total*Math.PI*2,end=angle+a,x1=cx+r*Math.cos(angle),y1=cy+r*Math.sin(angle),x2=cx+r*Math.cos(end),y2=cy+r*Math.sin(end),large=a>Math.PI?1:0,c=COLORS[i%COLORS.length];s+=`<path d="M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z" fill="${c}" stroke="#fff" stroke-width="2"><title>${esc(d.name)}: ${money(d.sales)}</title></path>`;angle=end;});
+  s+=`<circle cx="${cx}" cy="${cy}" r="58" fill="#fff"/>`+svgText(cx,194,'Total','text-anchor="middle" font-size="12" fill="#64748b"')+svgText(cx,216,money(total),'text-anchor="middle" font-size="17" font-weight="800" fill="#0f172a"');
+  items.forEach((d,i)=>{const y=105+i*55,c=COLORS[i%COLORS.length],pct=(d.sales/total*100).toFixed(1);s+=`<rect x="445" y="${y-11}" width="13" height="13" fill="${c}" rx="2"/>`+svgText(466,y,`${d.name} — ${money(d.sales)} (${pct}%)`,'font-size="12" fill="#334155"');}); setChart(id,s);
+}
+function render(a) {
+  const sales=sum(a,'Total_Sales'),orders=new Set(a.map(r=>r.Invoice_ID)).size,qty=sum(a,'Quantity'),aov=orders?sales/orders:0;
+  document.getElementById('kpiSales').textContent=money(sales);document.getElementById('kpiOrders').textContent=orders.toLocaleString('en-IN');document.getElementById('kpiQty').textContent=qty.toLocaleString('en-IN');document.getElementById('kpiAov').textContent=money(aov);
+  const monthOrder=['2025-01','2025-02','2025-03'], monthMap=Object.fromEntries(group(a,'Month').map(x=>[x.name,x.sales]));
+  lineChart('monthlyChart','Monthly sales trend',monthOrder.map(name=>({name,sales:monthMap[name]||0})));
+  barChart('categoryChart','Sales by product category',group(a,'Product_Category'),{colors:['#2563eb','#7c3aed','#06b6d4']});
+  groupedBarChart('locationChart','Sales by city and branch',group(a,'City'),group(a,'Branch'));
+  horizontalBarChart('productChart','Top 10 products by total sales',group(a,'Product').slice(0,10));
+  donutChart('paymentChart','Payment method sales',group(a,'Payment_Method'));
+  barChart('customerChart','Customer type sales analysis',group(a,'Customer_Type'),{colors:['#7c3aed','#a78bfa']});
+  barChart('genderChart','Gender sales analysis',group(a,'Gender'),{colors:['#ec4899','#0ea5e9']});
+}
+function applyFilters() {
+  const from=document.getElementById('dateFrom').value,to=document.getElementById('dateTo').value,city=selected('city'),cat=selected('category'),gender=selected('gender'),customer=selected('customer'),payment=selected('payment');
+  render(DATA.filter(r=>(!from||r.Date>=from)&&(!to||r.Date<=to)&&(!city.length||city.includes(String(r.City)))&&(!cat.length||cat.includes(String(r.Product_Category)))&&(!gender.length||gender.includes(String(r.Gender)))&&(!customer.length||customer.includes(String(r.Customer_Type)))&&(!payment.length||payment.includes(String(r.Payment_Method)))));
+}
+function resetFilters() { ['city','category','gender','customer','payment'].forEach(id=>Array.from(document.getElementById(id).options).forEach(o=>o.selected=false));document.getElementById('dateFrom').value='2025-01-01';document.getElementById('dateTo').value='2025-03-12';render(DATA); }
+window.addEventListener('resize',()=>applyFilters());
+render(DATA);
+</script>
+</body></html>
